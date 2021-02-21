@@ -1,0 +1,6 @@
+pyinstaller.exe --onefile --paths venv\Lib\site-packages --hidden-import openpyxl --windowed main.py
+
+Dlls from:
+venv\Lib\site-packages\PySide6\plugins\imageformats
+venv\Lib\site-packages\PySide6\plugins\platforms
+venv\Lib\site-packages\PySide6\plugins\styles
