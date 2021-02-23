@@ -15,6 +15,9 @@ class CLRProcessor:
     def addSheet(self, sheet):
         self._loadedSheets.append(sheet)
 
+    def sheetFileAlreadyParsed(self, filepath):
+        return any(sheet.fullFilePath == filepath for sheet in self._parsedSheets)
+
     def setCodeFilter(self, codes: list):
         self._codesFilter = codes
 
@@ -28,10 +31,8 @@ class CLRProcessor:
         self._rateFilter = None
 
     def buildCLR(self):
-        self._clearErrors()
         self._loadSheetsData()
         print("CLR Errors: ", self.getErrors())
-
 
         if self._codesFilter:
             self._codes = {key: self._codes[key] for key in self._filterCodes()}
@@ -59,6 +60,7 @@ class CLRProcessor:
                     yield key
 
     def _loadSheetsData(self):
+        self._clearErrors()
         self._codes = {}
         for sheet in self._loadedSheets:
             if not sheet.loaded:

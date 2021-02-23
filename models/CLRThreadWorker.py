@@ -7,11 +7,12 @@ from models.DataRecognitionSystem import DataRecognitionSystem
 from models.Sheet import Sheet
 
 
-class CLRWorker(QtCore.QThread):
+class CLRThreadWorker(QtCore.QThread):
     updateClrStatusSignal = QtCore.Signal(str)
     updateCLRTableWidgetSignal = QtCore.Signal(int)
     addUndefinedSheetListSignal = QtCore.Signal(Sheet)
     clearUndefinedSheetListSignal = QtCore.Signal()
+    updateSheetErrorsSignal = QtCore.Signal(list)
 
     def __init__(self, dataRecognitionSystem: DataRecognitionSystem):
         QtCore.QThread.__init__(self)
@@ -19,13 +20,22 @@ class CLRWorker(QtCore.QThread):
         self._dataRecognitionSystem = dataRecognitionSystem
         self._selectedFiles = None
         self._undefinedSheets = None
-        self._definedSheets = None
+        self._definedSheets = []
         self._workMode = 1
-        self._workParameters = None
+
+    def setWorkMode1(self):
+        self._workMode = 1
+        self._clr.clearCodeFilter()
+        self._clr.clearRateFilter()
 
     def setWorkMode2(self, destination, code, rate):
         self._workMode = 2
-        self._workParameters = (destination, code, rate)
+        self._clr.clearCodeFilter()
+        self._clr.clearRateFilter()
+        if code != '' and not code.isspace():
+            self._clr.setCodeFilter(code)
+        if rate != '' and not rate.isspace():
+            self._clr.setRateFilter(float(rate))
 
     def setFiles(self, files):
         self._selectedFiles = files
@@ -40,6 +50,7 @@ class CLRWorker(QtCore.QThread):
                 self._clr.addSheet(sheet)
                 self.updateClrStatusSignal.emit(
                     f"Column definition succeeded for the sheet {sheet.filename}")
+                self._definedSheets.append(sheet)
                 self._undefinedSheets.remove(sheet)
             else:
                 self.updateClrStatusSignal.emit(
@@ -51,8 +62,11 @@ class CLRWorker(QtCore.QThread):
 
     def run(self):
         self._undefinedSheets = []
-        self._definedSheets = []
+        #self._definedSheets = []
+        self.updateCLRTableWidgetSignal.emit(0)
         for file in self._selectedFiles:
+            if self._clr.sheetFileAlreadyParsed(file[0]):
+                continue
             self.updateClrStatusSignal.emit(f"Loading file {ntpath.basename(file[0])}...")
             sheet = Sheet(file[0])
             sheet.load()
@@ -66,20 +80,16 @@ class CLRWorker(QtCore.QThread):
                 self._clr.addSheet(sheet)
 
         self._updateUndefinedSheetListUI()
+
         if len(self._definedSheets) == 0:
             self.updateClrStatusSignal.emit("Please set manually aliases for unparsed sheets")
             return
 
-
         self.updateClrStatusSignal.emit("Parsing data...")
-        if self._workMode == 2:
-            if self._workParameters[1] != '':
-                self._clr.setCodeFilter(self._workParameters[1])
-            if self._workParameters[2]:
-                self._clr.setRateFilter(float(self._workParameters[2]))
         self._clr.buildCLR()
         self.updateClrStatusSignal.emit("Populating result table...")
         self.updateCLRTableWidgetSignal.emit(1)
+        self.updateSheetErrorsSignal.emit(self._clr.getErrors())
         if len(self._undefinedSheets) == 0:
             self.updateClrStatusSignal.emit("Done. All sheets were parsed successfully")
         else:

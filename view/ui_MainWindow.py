@@ -209,14 +209,35 @@ class Ui_MainWindow(object):
 
         self.clrErrors.addWidget(self.clrErrorslist, 0, Qt.AlignTop)
 
-        self.clrSetAlias = QPushButton(self.page_3)
-        self.clrSetAlias.setObjectName(u"clrSetAlias")
-        self.clrSetAlias.setMinimumSize(QSize(0, 80))
-
-        self.clrErrors.addWidget(self.clrSetAlias, 0, Qt.AlignVCenter)
-
 
         self.verticalLayout_4.addLayout(self.clrErrors)
+
+        self.gridLayout_4 = QGridLayout()
+        self.gridLayout_4.setObjectName(u"gridLayout_4")
+        self.page3GoBackBtn = QPushButton(self.page_3)
+        self.page3GoBackBtn.setObjectName(u"page3GoBackBtn")
+        self.page3GoBackBtn.setMinimumSize(QSize(152, 0))
+
+        self.gridLayout_4.addWidget(self.page3GoBackBtn, 0, 0, 1, 1)
+
+        self.page3ShowErrorsBtn = QPushButton(self.page_3)
+        self.page3ShowErrorsBtn.setObjectName(u"page3ShowErrorsBtn")
+        self.page3ShowErrorsBtn.setMinimumSize(QSize(152, 0))
+
+        self.gridLayout_4.addWidget(self.page3ShowErrorsBtn, 0, 3, 1, 1)
+
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.gridLayout_4.addItem(self.horizontalSpacer_3, 0, 1, 1, 1)
+
+        self.page3SetAliasesBtn = QPushButton(self.page_3)
+        self.page3SetAliasesBtn.setObjectName(u"page3SetAliasesBtn")
+        self.page3SetAliasesBtn.setMinimumSize(QSize(152, 0))
+
+        self.gridLayout_4.addWidget(self.page3SetAliasesBtn, 0, 2, 1, 1)
+
+
+        self.verticalLayout_4.addLayout(self.gridLayout_4)
 
         self.stackedWidget.addWidget(self.page_3)
         self.page = QWidget()
@@ -255,7 +276,7 @@ class Ui_MainWindow(object):
         self.radioOpt2.toggled.connect(self.codeEdit.setEnabled)
         self.radioOpt2.toggled.connect(self.rateEdit.setEnabled)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -284,7 +305,9 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem2 = self.clrTable.horizontalHeaderItem(2)
         ___qtablewidgetitem2.setText(QCoreApplication.translate("MainWindow", u"Files...", None));
         self.clrErrorLabel.setText(QCoreApplication.translate("MainWindow", u"Column definition errors occurred in the following files. Double-click on files to set columns manually:", None))
-        self.clrSetAlias.setText(QCoreApplication.translate("MainWindow", u"Set alias", None))
+        self.page3GoBackBtn.setText(QCoreApplication.translate("MainWindow", u"< Back to select option", None))
+        self.page3ShowErrorsBtn.setText(QCoreApplication.translate("MainWindow", u"Show sheets errors", None))
+        self.page3SetAliasesBtn.setText(QCoreApplication.translate("MainWindow", u"Set aliases", None))
         self.pushButton.setText(QCoreApplication.translate("MainWindow", u"PushButton", None))
     # retranslateUi
 

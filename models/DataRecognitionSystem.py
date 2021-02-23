@@ -1,6 +1,3 @@
-import time
-
-import utilities
 from models.Sheet import Sheet
 
 
@@ -11,7 +8,6 @@ class DataRecognitionSystem:
     userCountryAliases = []
     userCodeAliases = []
     userRateAliases = []
-
 
     def determineSheetData(self, sheet: Sheet):
         for sheetname in sheet.workbook.sheetnames:
@@ -56,7 +52,7 @@ class DataRecognitionSystem:
                     continue
                 if cellValue.lower() == alias:
                     resColumn = column
-                    #print(f"Found = {alias} in the cell {line}-{column} ({cellValue})")
+                    # print(f"Found = {alias} in the cell {line}-{column} ({cellValue})")
                     break
             if resColumn == 0:
                 for column in range(1, 21):
@@ -67,7 +63,7 @@ class DataRecognitionSystem:
                         continue
                     if alias in cellValue.lower():
                         resColumn = column
-                        #print(f"Found 'in' {alias} in the cell {line}-{column} ({cellValue})")
+                        # print(f"Found 'in' {alias} in the cell {line}-{column} ({cellValue})")
                         break
         return resColumn
 
