@@ -1,3 +1,4 @@
+import ntpath
 from os import path
 
 from PySide6 import QtWidgets
@@ -17,12 +18,13 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-
+        # ui initialization:
         self.ui.clrTable.verticalHeader().setVisible(False)
         self.ui.clrTable.setEditTriggers(QtWidgets.QTableWidget.NoEditTriggers)
         self.ui.stackedWidget.setCurrentIndex(0)
         self.setCLRErrorListVisible(False)
-
+        self._setAliasesDialog = SetAliasesWindow(self)
+        # field initialization:
         self._dataRecognitionSystem = DataRecognitionSystem()
         self._clrWorker = CLRWorker(self._dataRecognitionSystem)
         # self.selectedFiles = [('C:/Users/User/PycharmProjects/RatesComparator/data/7741_Airtime_Tech_RTX_Ratesheet_2020-12-11.xlsx', ''),
@@ -30,7 +32,7 @@ class MainWindow(QMainWindow):
         #                       ('C:/Users/User/PycharmProjects/RatesComparator/data/RouteTrader_EUR_CLI_04082020.xlsx', ''),
         #                       ('C:/Users/User/PycharmProjects/RatesComparator/data/Symbio_MVP_International_Standard_Rate_Card_B5F1120(1).xlsx', '')]
         # self.ui.page2NextBtn.setEnabled(True)
-        self.selectedFiles = []
+        self._selectedFiles = []
 
         self.linkActions()
 
@@ -43,15 +45,16 @@ class MainWindow(QMainWindow):
         self.ui.btnAddFiles.clicked.connect(self.addFiles)
         self.ui.filesList.selectionModel().selectionChanged.connect(self.filesListChanged)
         self.ui.btnDelFiles.clicked.connect(self.deleteSelectedFile)
+        self.ui.page2BackBtn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
         self.ui.page2NextBtn.clicked.connect(self.page2NextBtnClicked)
 
-        # Page 3:
-        self.ui.clrSetAlias.clicked.connect(self.setAliasForSheet)
-        self.ui.clrErrorslist.doubleClicked.connect(self.setAliasForSheet)
+        # Page 3 (CLR):
+        self.ui.clrSetAlias.clicked.connect(self.setAliases)
+        self.ui.clrErrorslist.doubleClicked.connect(self.setAliases)
 
         # CLR Worker:
         self._clrWorker.updateClrStatusSignal.connect(self.changeCLRStatus)
-        self._clrWorker.updateTableWidgetSignal.connect(self.updateCLRTableWidget)
+        self._clrWorker.updateCLRTableWidgetSignal.connect(self.updateCLRTableWidget)
         self._clrWorker.addUndefinedSheetListSignal.connect(self.addUndefinedCLRsheet)
         self._clrWorker.clearUndefinedSheetListSignal.connect(self.clearUndefinedSheetList)
 
@@ -61,18 +64,11 @@ class MainWindow(QMainWindow):
         self.setCLRErrorListVisible(False)
 
     @Slot()
-    def setAliasForSheet(self):
-        errorslist = self.ui.clrErrorslist
-        items = errorslist.selectedItems()
-        if not items:
-            return
-        itemNum = errorslist.row(items[0])
-
-        dialog = SetAliasesWindow(self)
-        dialog.exec_()
-        if dialog.isOk():
-            values = dialog.getValues()
-            self._clrWorker.updateDataForUndefinedSheet(itemNum, values)
+    def setAliases(self):
+        self._setAliasesDialog.exec_()
+        if self._setAliasesDialog.isOk():
+            values = self._setAliasesDialog.getValues()
+            self._clrWorker.updateDataForUndefinedSheets(values)
 
 
     def setCLRErrorListVisible(self, visible:bool):
@@ -88,22 +84,24 @@ class MainWindow(QMainWindow):
     @Slot()
     def page2NextBtnClicked(self):
         self.ui.stackedWidget.setCurrentIndex(2)
-        self._clrWorker.setFiles(self.selectedFiles)
+        self._clrWorker.setFiles(self._selectedFiles)
+        if self.ui.radioOpt2.isChecked():
+            self._clrWorker.setWorkMode2(self.ui.destEdit.text(), self.ui.codeEdit.text(), self.ui.rateEdit.text())
         self._clrWorker.start()
-        #self._clrWorker.run()
+        # self._clrWorker.run()
 
 
     @Slot()
     def deleteSelectedFile(self):
         for i in self.ui.filesList.selectedItems():
-            for f in self.selectedFiles:
+            for f in self._selectedFiles:
                 if f[1] == i.text():
-                    self.selectedFiles.remove(f)
+                    self._selectedFiles.remove(f)
         # for i in self.selectedFiles:
         #     print(i)
         for i in self.ui.filesList.selectedItems():
             self.ui.filesList.takeItem(self.ui.filesList.row(i))
-        self.ui.btnNext.setEnabled(len(self.selectedFiles) > 0)
+        self.ui.btnNext.setEnabled(len(self._selectedFiles) > 0)
 
     @Slot()
     def filesListChanged(self):
@@ -116,10 +114,10 @@ class MainWindow(QMainWindow):
             head, tail = ntpath.split(f)
             caption = f"{tail} \t({head})"
             widgetItem = (f, caption)
-            if widgetItem not in self.selectedFiles:
-                self.selectedFiles.append(widgetItem)
+            if widgetItem not in self._selectedFiles:
+                self._selectedFiles.append(widgetItem)
                 self.ui.filesList.addItem(caption)
-        if len(self.selectedFiles) > 0:
+        if len(self._selectedFiles) > 0:
             self.ui.page2NextBtn.setEnabled(True)
 
 
@@ -141,34 +139,37 @@ class MainWindow(QMainWindow):
         clr = self._clrWorker.getCLR()
         table = self.ui.clrTable
 
-        if clr.complete:
-            table.clear()
-            codes = clr.getAllCodes()
-            maxc = clr.getMaxCountOfSheetsForCode()
-            colNames = ["Destination", "Codes", "Least cost"] + ["Next least cost" if True else "File" for i in range(1*(maxc-1))]
-            table.setColumnCount(2 + 1*maxc)
-            table.setHorizontalHeaderLabels(colNames)
-            table.setRowCount(len(codes))
-            m = 0
-            prevCountryName = ""
-            for i, code in enumerate(sorted(codes)):
-                countryName = str(codes[code][0][1])
-                if countryName == prevCountryName:
-                    m += 1
-                    #print(i, code, i - m, 0, 1, m+1)
-                    table.setSpan(i - m, 0, m+1, 1)
-                else:
-                    m = 0
-                    table.setItem(i, 0, QTableWidgetItem(countryName))
-                table.setItem(i, 1, QTableWidgetItem(str(code)))
-                cc = len(codes[code])
-                for j in range(cc):
-                    # if code==51: print(codes[code][j])
-                    filename = str(codes[code][j][0])
-                    price = "{:.2f}".format(codes[code][j][2])
-                    # table.setItem(i, 2 + j*2, QTableWidgetItem(price))
-                    table.setItem(i, 2 + j, QTableWidgetItem(f"({price}) {filename}"))
-                prevCountryName = countryName
-                #if i == 0: break
-
+        table.clear()
+        codes = clr.getResult()
+        maxc = clr.getMaxCountOfSheetsForCode()
+        colNames = ["Destination", "Codes", "Least cost"] + ["Next least cost" for i in range(1*(maxc-1))]
+        table.setColumnCount(2 + maxc)
+        table.setHorizontalHeaderLabels(colNames)
+        if len(codes) == 0:
+            table.setRowCount(1)
+            table.setItem(0, 0, QTableWidgetItem("No data found"))
+            table.setSpan(0,0,1,3)
             table.resizeColumnsToContents()
+            return
+        table.setRowCount(len(codes))
+        m = 0
+        prevCountryName = ""
+        for i, code in enumerate(sorted(codes)):
+            countryName = str(codes[code][0][1])
+            if countryName == prevCountryName:
+                m += 1
+                #print(i, code, i - m, 0, 1, m+1)
+                table.setSpan(i - m, 0, m+1, 1)
+            else:
+                m = 0
+                table.setItem(i, 0, QTableWidgetItem(countryName))
+            table.setItem(i, 1, QTableWidgetItem(str(code)))
+            cc = len(codes[code])
+            for j in range(cc):
+                filename = str(codes[code][j][0])
+                price = "{:.2f}".format(codes[code][j][2])
+                table.setItem(i, 2 + j, QTableWidgetItem(f"({price}) {filename}"))
+            prevCountryName = countryName
+            #if i == 0: break
+
+        table.resizeColumnsToContents()

@@ -1,51 +1,49 @@
 import time
 
+import utilities
 from models.Sheet import Sheet
 
 
 class DataRecognitionSystem:
-    countryNames = ["destination", "country"]
-    codeNames = ["prefix", "dial", "code"]
-    rateNames = ["rate", "current rate", "price"]
+    countryAliases = ["destination", "country"]
+    codeAliases = ["prefix", "dial", "code"]
+    rateAliases = ["rate", "current rate", "price"]
+    userCountryAliases = []
+    userCodeAliases = []
+    userRateAliases = []
 
-    def determineSheetData(self, sheet: Sheet, extraAliases = []):
-        if extraAliases:
-            assert len(extraAliases) == 3, 'extraAliases len should be = 3'
-            self.updateAliases(extraAliases)
-        #print("Working with sheet ", sheet)
 
+    def determineSheetData(self, sheet: Sheet):
         for sheetname in sheet.workbook.sheetnames:
             worksheet = sheet.workbook[sheetname]
-            #print("Working with sheet ", sheetname)
-
             for line in range(1, 71):
-                # if line == 6 and "Korea" in str(sheet):
-                #     print("!")
-                # if line == 10 and "Airtime" in str(sheet):
-                #     print("!")
-
-                destCol = self.findAlias(line, self.countryNames, worksheet)
-                codeCol = self.findAlias(line, self.codeNames, worksheet, [destCol])
-                rateCol = self.findAlias(line, self.rateNames, worksheet, [destCol, codeCol])
+                destCol = self.findAlias(line, self.countryAliases + self.userCountryAliases, worksheet)
+                codeCol = self.findAlias(line, self.codeAliases + self.userCodeAliases, worksheet, [destCol])
+                rateCol = self.findAlias(line, self.rateAliases + self.userRateAliases, worksheet, [destCol, codeCol])
 
                 if destCol > 0 and codeCol > 0 and rateCol > 0:
-                    #print(f"Search finished on sheet {sheetname}")
-                    #print(f"Found dest:{destCol}    code:{codeCol}  rate:{rateCol} on the line {line}")
                     dataLine = self.findDataRow(line, rateCol, worksheet)
                     if dataLine != -1:
-                        #print(f"Found data line {dataLine}")
                         sheet.setDataFormat(sheetname, destCol, codeCol, rateCol, dataLine)
                         break
 
-    def updateAliases(self, extraAliases):
-        extraAliases = list(extraAliases)
-        for i in range(len(extraAliases)):
-            extraAliases[i] = extraAliases[i].split(",")
-            for j in range(len(extraAliases[i])):
-                extraAliases[i][j] = extraAliases[i][j].strip().lower()
-        self.countryNames.extend(extraAliases[0])
-        self.codeNames.extend(extraAliases[1])
-        self.rateNames.extend(extraAliases[2])
+    def setUserAliases(self, userAliases):
+        assert len(userAliases) == 3, 'userAliases len should be = 3'
+        userAliases = list(userAliases)
+        for i in range(len(userAliases)):
+            userAliases[i] = userAliases[i].split(",")
+            for j in range(len(userAliases[i])):
+                userAliases[i][j] = userAliases[i][j].strip().lower()
+
+        for aliasCat in userAliases:
+            for alias in aliasCat:
+                if alias == '' or alias.isspace():
+                    aliasCat.remove(alias)
+
+        self.userCountryAliases = userAliases[0]
+        self.userCodeAliases = userAliases[1]
+        self.userRateAliases = userAliases[2]
+        print(f"Updated user aliases: ", self.userCountryAliases, self.userCodeAliases, self.userRateAliases)
 
     def findAlias(self, line, array, worksheet, ignoreColumns=[]):
         resColumn = 0

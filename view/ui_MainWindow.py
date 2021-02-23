@@ -49,22 +49,22 @@ class Ui_MainWindow(object):
         self.page_1.setObjectName(u"page_1")
         self.verticalLayout_2 = QVBoxLayout(self.page_1)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.radioCreateLCR = QRadioButton(self.page_1)
-        self.radioCreateLCR.setObjectName(u"radioCreateLCR")
+        self.radioOpt1 = QRadioButton(self.page_1)
+        self.radioOpt1.setObjectName(u"radioOpt1")
         sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.radioCreateLCR.sizePolicy().hasHeightForWidth())
-        self.radioCreateLCR.setSizePolicy(sizePolicy)
-        self.radioCreateLCR.setSizeIncrement(QSize(0, 0))
-        self.radioCreateLCR.setChecked(True)
+        sizePolicy.setHeightForWidth(self.radioOpt1.sizePolicy().hasHeightForWidth())
+        self.radioOpt1.setSizePolicy(sizePolicy)
+        self.radioOpt1.setSizeIncrement(QSize(0, 0))
+        self.radioOpt1.setChecked(True)
 
-        self.verticalLayout_2.addWidget(self.radioCreateLCR)
+        self.verticalLayout_2.addWidget(self.radioOpt1)
 
-        self.radioUploadSh = QRadioButton(self.page_1)
-        self.radioUploadSh.setObjectName(u"radioUploadSh")
+        self.radioOpt2 = QRadioButton(self.page_1)
+        self.radioOpt2.setObjectName(u"radioOpt2")
 
-        self.verticalLayout_2.addWidget(self.radioUploadSh)
+        self.verticalLayout_2.addWidget(self.radioOpt2)
 
         self.formLayout = QFormLayout()
         self.formLayout.setObjectName(u"formLayout")
@@ -91,7 +91,7 @@ class Ui_MainWindow(object):
         self.codeEdit = QLineEdit(self.page_1)
         self.codeEdit.setObjectName(u"codeEdit")
         self.codeEdit.setEnabled(False)
-        self.codeEdit.setMaxLength(15)
+        self.codeEdit.setMaxLength(32767)
         self.codeEdit.setCursorPosition(0)
 
         self.formLayout.setWidget(1, QFormLayout.FieldRole, self.codeEdit)
@@ -105,17 +105,12 @@ class Ui_MainWindow(object):
         self.rateEdit = QLineEdit(self.page_1)
         self.rateEdit.setObjectName(u"rateEdit")
         self.rateEdit.setEnabled(False)
-        self.rateEdit.setMaxLength(8)
+        self.rateEdit.setMaxLength(32767)
 
         self.formLayout.setWidget(2, QFormLayout.FieldRole, self.rateEdit)
 
 
         self.verticalLayout_2.addLayout(self.formLayout)
-
-        self.radioButton = QRadioButton(self.page_1)
-        self.radioButton.setObjectName(u"radioButton")
-
-        self.verticalLayout_2.addWidget(self.radioButton)
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
@@ -173,6 +168,11 @@ class Ui_MainWindow(object):
         self.btnDelFiles.setEnabled(False)
 
         self.gridLayout.addWidget(self.btnDelFiles, 0, 1, 1, 1)
+
+        self.page2BackBtn = QPushButton(self.page_2)
+        self.page2BackBtn.setObjectName(u"page2BackBtn")
+
+        self.gridLayout.addWidget(self.page2BackBtn, 1, 1, 1, 1)
 
 
         self.verticalLayout_3.addLayout(self.gridLayout)
@@ -240,22 +240,22 @@ class Ui_MainWindow(object):
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
-        QWidget.setTabOrder(self.radioCreateLCR, self.codeEdit)
-        QWidget.setTabOrder(self.codeEdit, self.radioUploadSh)
-        QWidget.setTabOrder(self.radioUploadSh, self.rateEdit)
+        QWidget.setTabOrder(self.radioOpt1, self.codeEdit)
+        QWidget.setTabOrder(self.codeEdit, self.radioOpt2)
+        QWidget.setTabOrder(self.radioOpt2, self.rateEdit)
         QWidget.setTabOrder(self.rateEdit, self.page1NextBtn)
         QWidget.setTabOrder(self.page1NextBtn, self.filesList)
         QWidget.setTabOrder(self.filesList, self.destEdit)
 
         self.retranslateUi(MainWindow)
-        self.radioUploadSh.toggled.connect(self.destlabel.setEnabled)
-        self.radioUploadSh.toggled.connect(self.codeLabel.setEnabled)
-        self.radioUploadSh.toggled.connect(self.rateLabel.setEnabled)
-        self.radioUploadSh.toggled.connect(self.destEdit.setEnabled)
-        self.radioUploadSh.toggled.connect(self.codeEdit.setEnabled)
-        self.radioUploadSh.toggled.connect(self.rateEdit.setEnabled)
+        self.radioOpt2.toggled.connect(self.destlabel.setEnabled)
+        self.radioOpt2.toggled.connect(self.codeLabel.setEnabled)
+        self.radioOpt2.toggled.connect(self.rateLabel.setEnabled)
+        self.radioOpt2.toggled.connect(self.destEdit.setEnabled)
+        self.radioOpt2.toggled.connect(self.codeEdit.setEnabled)
+        self.radioOpt2.toggled.connect(self.rateEdit.setEnabled)
 
-        self.stackedWidget.setCurrentIndex(2)
+        self.stackedWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -263,20 +263,20 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Comporator", None))
-        self.radioCreateLCR.setText(QCoreApplication.translate("MainWindow", u"Create LCR from all Supplier Sheets", None))
-        self.radioUploadSh.setText(QCoreApplication.translate("MainWindow", u"Customize", None))
+        self.radioOpt1.setText(QCoreApplication.translate("MainWindow", u"Create LCR from all Supplier Sheets", None))
+        self.radioOpt2.setText(QCoreApplication.translate("MainWindow", u"Customize", None))
         self.destlabel.setText(QCoreApplication.translate("MainWindow", u"Enter the Destination:", None))
         self.codeLabel.setText(QCoreApplication.translate("MainWindow", u"Enter the Dial Code:", None))
-        self.codeEdit.setInputMask(QCoreApplication.translate("MainWindow", u"900000000000000", None))
+        self.codeEdit.setInputMask("")
         self.codeEdit.setText("")
         self.rateLabel.setText(QCoreApplication.translate("MainWindow", u"Enter the Rate:", None))
-        self.rateEdit.setInputMask(QCoreApplication.translate("MainWindow", u"D0000000", None))
-        self.radioButton.setText(QCoreApplication.translate("MainWindow", u"Upload Customer Rate Sheet", None))
+        self.rateEdit.setInputMask("")
         self.page1NextBtn.setText(QCoreApplication.translate("MainWindow", u"Next", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Add sheets for creating LCR:", None))
         self.page2NextBtn.setText(QCoreApplication.translate("MainWindow", u"Next", None))
         self.btnAddFiles.setText(QCoreApplication.translate("MainWindow", u"Add files", None))
         self.btnDelFiles.setText(QCoreApplication.translate("MainWindow", u"Delete selected", None))
+        self.page2BackBtn.setText(QCoreApplication.translate("MainWindow", u"Back", None))
         ___qtablewidgetitem = self.clrTable.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"Destination", None));
         ___qtablewidgetitem1 = self.clrTable.horizontalHeaderItem(1)

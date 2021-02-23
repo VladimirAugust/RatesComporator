@@ -43,12 +43,12 @@ QPushButton {
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_1">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QRadioButton" name="radioCreateLCR">
+         <widget class="QRadioButton" name="radioOpt1">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -70,7 +70,7 @@ QPushButton {
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="radioUploadSh">
+         <widget class="QRadioButton" name="radioOpt2">
           <property name="text">
            <string>Customize</string>
           </property>
@@ -126,13 +126,13 @@ QPushButton {
              <bool>false</bool>
             </property>
             <property name="inputMask">
-             <string>900000000000000</string>
+             <string/>
             </property>
             <property name="text">
              <string/>
             </property>
             <property name="maxLength">
-             <number>15</number>
+             <number>32767</number>
             </property>
             <property name="cursorPosition">
              <number>0</number>
@@ -155,21 +155,14 @@ QPushButton {
              <bool>false</bool>
             </property>
             <property name="inputMask">
-             <string>D0000000</string>
+             <string/>
             </property>
             <property name="maxLength">
-             <number>8</number>
+             <number>32767</number>
             </property>
            </widget>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="radioButton">
-          <property name="text">
-           <string>Upload Customer Rate Sheet</string>
-          </property>
-         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -264,6 +257,13 @@ QPushButton {
             </property>
             <property name="text">
              <string>Delete selected</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="page2BackBtn">
+            <property name="text">
+             <string>Back</string>
             </property>
            </widget>
           </item>
@@ -376,9 +376,9 @@ QPushButton {
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <tabstops>
-  <tabstop>radioCreateLCR</tabstop>
+  <tabstop>radioOpt1</tabstop>
   <tabstop>codeEdit</tabstop>
-  <tabstop>radioUploadSh</tabstop>
+  <tabstop>radioOpt2</tabstop>
   <tabstop>rateEdit</tabstop>
   <tabstop>page1NextBtn</tabstop>
   <tabstop>filesList</tabstop>
@@ -387,7 +387,7 @@ QPushButton {
  <resources/>
  <connections>
   <connection>
-   <sender>radioUploadSh</sender>
+   <sender>radioOpt2</sender>
    <signal>toggled(bool)</signal>
    <receiver>destlabel</receiver>
    <slot>setEnabled(bool)</slot>
@@ -403,7 +403,7 @@ QPushButton {
    </hints>
   </connection>
   <connection>
-   <sender>radioUploadSh</sender>
+   <sender>radioOpt2</sender>
    <signal>toggled(bool)</signal>
    <receiver>codeLabel</receiver>
    <slot>setEnabled(bool)</slot>
@@ -419,7 +419,7 @@ QPushButton {
    </hints>
   </connection>
   <connection>
-   <sender>radioUploadSh</sender>
+   <sender>radioOpt2</sender>
    <signal>toggled(bool)</signal>
    <receiver>rateLabel</receiver>
    <slot>setEnabled(bool)</slot>
@@ -435,7 +435,7 @@ QPushButton {
    </hints>
   </connection>
   <connection>
-   <sender>radioUploadSh</sender>
+   <sender>radioOpt2</sender>
    <signal>toggled(bool)</signal>
    <receiver>destEdit</receiver>
    <slot>setEnabled(bool)</slot>
@@ -451,7 +451,7 @@ QPushButton {
    </hints>
   </connection>
   <connection>
-   <sender>radioUploadSh</sender>
+   <sender>radioOpt2</sender>
    <signal>toggled(bool)</signal>
    <receiver>codeEdit</receiver>
    <slot>setEnabled(bool)</slot>
@@ -467,7 +467,7 @@ QPushButton {
    </hints>
   </connection>
   <connection>
-   <sender>radioUploadSh</sender>
+   <sender>radioOpt2</sender>
    <signal>toggled(bool)</signal>
    <receiver>rateEdit</receiver>
    <slot>setEnabled(bool)</slot>

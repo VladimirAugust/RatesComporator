@@ -13,11 +13,11 @@ class SetAliasesWindow(QtWidgets.QDialog):
 
 
     def accept(self):
-        if self.ui.destAlias.text() and self.ui.codeAlias.text() and self.ui.rateAlias.text():
+        if self.ui.destAlias.text() or self.ui.codeAlias.text() or self.ui.rateAlias.text():
             self._isOk = True
             self.close()
         else:
-            self.ui.errorLabel.setText("Please fill in all fields")
+            self.ui.errorLabel.setText("Please fill in any fields")
 
     def reject(self):
         self.close()
