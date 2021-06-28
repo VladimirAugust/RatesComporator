@@ -11,6 +11,12 @@ class SetAliasesWindow(QtWidgets.QDialog):
 
         self._isOk = False
 
+    def setAliases(self, aliases):
+        destAliases, codeAliases, rateAliases = aliases
+        self.ui.destAlias.setText(", ".join(destAliases))
+        self.ui.codeAlias.setText(", ".join(codeAliases))
+        self.ui.rateAlias.setText(", ".join(rateAliases))
+
 
     def accept(self):
         if self.ui.destAlias.text() or self.ui.codeAlias.text() or self.ui.rateAlias.text():

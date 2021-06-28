@@ -26,19 +26,8 @@ class Ui_MainWindow(object):
 "QRadioButton#radioButton {\n"
 "	margin-top: 20px;\n"
 "}\n"
-"QVBoxLayout QFormLayout Qlabel{\n"
-"	margin-left: 50px;\n"
-"}\n"
-"QPushButton#btnAddFiles, QPushButton#btnNext, QPushButton#btnDelFiles {\n"
-"	min-width: 150px;\n"
-"	float: right;\n"
-"}\n"
-"QPushButton {\n"
-"	width: 30px;\n"
-"}\n"
-"#clrTable {\n"
-"	margin-bottom: 20px;\n"
-"}")
+"\n"
+"")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
@@ -78,7 +67,7 @@ class Ui_MainWindow(object):
         self.destEdit = QLineEdit(self.page_1)
         self.destEdit.setObjectName(u"destEdit")
         self.destEdit.setEnabled(False)
-        self.destEdit.setMaxLength(30)
+        self.destEdit.setMaxLength(32767)
 
         self.formLayout.setWidget(0, QFormLayout.FieldRole, self.destEdit)
 
@@ -112,16 +101,23 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_2.addLayout(self.formLayout)
 
+        self.radioButton = QRadioButton(self.page_1)
+        self.radioButton.setObjectName(u"radioButton")
+        self.radioButton.setEnabled(False)
+
+        self.verticalLayout_2.addWidget(self.radioButton)
+
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.horizontalLayout_2.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.horizontalLayout_2.setContentsMargins(-1, -1, 60, -1)
+        self.horizontalLayout_2.setContentsMargins(-1, -1, 0, -1)
         self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout_2.addItem(self.horizontalSpacer_2)
 
         self.page1NextBtn = QPushButton(self.page_1)
         self.page1NextBtn.setObjectName(u"page1NextBtn")
+        self.page1NextBtn.setMinimumSize(QSize(150, 0))
 
         self.horizontalLayout_2.addWidget(self.page1NextBtn)
 
@@ -148,6 +144,13 @@ class Ui_MainWindow(object):
         self.gridLayout = QGridLayout()
         self.gridLayout.setObjectName(u"gridLayout")
         self.gridLayout.setContentsMargins(-1, 0, -1, -1)
+        self.p2DellAllBtn = QPushButton(self.page_2)
+        self.p2DellAllBtn.setObjectName(u"p2DellAllBtn")
+        self.p2DellAllBtn.setEnabled(False)
+        self.p2DellAllBtn.setMinimumSize(QSize(150, 0))
+
+        self.gridLayout.addWidget(self.p2DellAllBtn, 1, 2, 1, 1)
+
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.gridLayout.addItem(self.horizontalSpacer, 0, 0, 1, 1)
@@ -155,22 +158,26 @@ class Ui_MainWindow(object):
         self.page2NextBtn = QPushButton(self.page_2)
         self.page2NextBtn.setObjectName(u"page2NextBtn")
         self.page2NextBtn.setEnabled(False)
+        self.page2NextBtn.setMinimumSize(QSize(150, 0))
 
-        self.gridLayout.addWidget(self.page2NextBtn, 1, 2, 1, 1)
+        self.gridLayout.addWidget(self.page2NextBtn, 1, 3, 1, 1)
 
         self.btnAddFiles = QPushButton(self.page_2)
         self.btnAddFiles.setObjectName(u"btnAddFiles")
+        self.btnAddFiles.setMinimumSize(QSize(0, 0))
 
-        self.gridLayout.addWidget(self.btnAddFiles, 0, 2, 1, 1)
+        self.gridLayout.addWidget(self.btnAddFiles, 0, 3, 1, 1)
 
         self.btnDelFiles = QPushButton(self.page_2)
         self.btnDelFiles.setObjectName(u"btnDelFiles")
         self.btnDelFiles.setEnabled(False)
+        self.btnDelFiles.setMinimumSize(QSize(0, 0))
 
-        self.gridLayout.addWidget(self.btnDelFiles, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.btnDelFiles, 0, 2, 1, 1)
 
         self.page2BackBtn = QPushButton(self.page_2)
         self.page2BackBtn.setObjectName(u"page2BackBtn")
+        self.page2BackBtn.setMinimumSize(QSize(150, 0))
 
         self.gridLayout.addWidget(self.page2BackBtn, 1, 1, 1, 1)
 
@@ -203,11 +210,11 @@ class Ui_MainWindow(object):
         self.clrErrors = QHBoxLayout()
         self.clrErrors.setObjectName(u"clrErrors")
         self.clrErrors.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.clrErrorslist = QListWidget(self.page_3)
-        self.clrErrorslist.setObjectName(u"clrErrorslist")
-        self.clrErrorslist.setMaximumSize(QSize(16777215, 80))
+        self.clrUndefSheetslist = QListWidget(self.page_3)
+        self.clrUndefSheetslist.setObjectName(u"clrUndefSheetslist")
+        self.clrUndefSheetslist.setMaximumSize(QSize(16777215, 80))
 
-        self.clrErrors.addWidget(self.clrErrorslist, 0, Qt.AlignTop)
+        self.clrErrors.addWidget(self.clrUndefSheetslist, 0, Qt.AlignTop)
 
 
         self.verticalLayout_4.addLayout(self.clrErrors)
@@ -287,13 +294,16 @@ class Ui_MainWindow(object):
         self.radioOpt1.setText(QCoreApplication.translate("MainWindow", u"Create LCR from all Supplier Sheets", None))
         self.radioOpt2.setText(QCoreApplication.translate("MainWindow", u"Customize", None))
         self.destlabel.setText(QCoreApplication.translate("MainWindow", u"Enter the Destination:", None))
+        self.destEdit.setInputMask("")
         self.codeLabel.setText(QCoreApplication.translate("MainWindow", u"Enter the Dial Code:", None))
         self.codeEdit.setInputMask("")
         self.codeEdit.setText("")
         self.rateLabel.setText(QCoreApplication.translate("MainWindow", u"Enter the Rate:", None))
         self.rateEdit.setInputMask("")
+        self.radioButton.setText(QCoreApplication.translate("MainWindow", u"Upload customer rate sheet", None))
         self.page1NextBtn.setText(QCoreApplication.translate("MainWindow", u"Next", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Add sheets for creating LCR:", None))
+        self.p2DellAllBtn.setText(QCoreApplication.translate("MainWindow", u"Delete all", None))
         self.page2NextBtn.setText(QCoreApplication.translate("MainWindow", u"Next", None))
         self.btnAddFiles.setText(QCoreApplication.translate("MainWindow", u"Add files", None))
         self.btnDelFiles.setText(QCoreApplication.translate("MainWindow", u"Delete selected", None))

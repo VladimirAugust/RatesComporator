@@ -24,19 +24,8 @@
 QRadioButton#radioButton {
 	margin-top: 20px;
 }
-QVBoxLayout QFormLayout Qlabel{
-	margin-left: 50px;
-}
-QPushButton#btnAddFiles, QPushButton#btnNext, QPushButton#btnDelFiles {
-	min-width: 150px;
-	float: right;
-}
-QPushButton {
-	width: 30px;
-}
-#clrTable {
-	margin-bottom: 20px;
-}</string>
+
+</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -105,8 +94,11 @@ QPushButton {
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="inputMask">
+             <string/>
+            </property>
             <property name="maxLength">
-             <number>30</number>
+             <number>32767</number>
             </property>
            </widget>
           </item>
@@ -165,12 +157,22 @@ QPushButton {
          </layout>
         </item>
         <item>
+         <widget class="QRadioButton" name="radioButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Upload customer rate sheet</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <property name="sizeConstraint">
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
           <property name="rightMargin">
-           <number>60</number>
+           <number>0</number>
           </property>
           <item>
            <spacer name="horizontalSpacer_2">
@@ -187,6 +189,12 @@ QPushButton {
           </item>
           <item>
            <widget class="QPushButton" name="page1NextBtn">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
              <string>Next</string>
             </property>
@@ -220,6 +228,22 @@ QPushButton {
           <property name="topMargin">
            <number>0</number>
           </property>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="p2DellAllBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Delete all</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <spacer name="horizontalSpacer">
             <property name="orientation">
@@ -233,27 +257,45 @@ QPushButton {
             </property>
            </spacer>
           </item>
-          <item row="1" column="2">
+          <item row="1" column="3">
            <widget class="QPushButton" name="page2NextBtn">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
             </property>
             <property name="text">
              <string>Next</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
+          <item row="0" column="3">
            <widget class="QPushButton" name="btnAddFiles">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
              <string>Add files</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="0" column="2">
            <widget class="QPushButton" name="btnDelFiles">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
             </property>
             <property name="text">
              <string>Delete selected</string>
@@ -262,6 +304,12 @@ QPushButton {
           </item>
           <item row="1" column="1">
            <widget class="QPushButton" name="page2BackBtn">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
              <string>Back</string>
             </property>
@@ -305,7 +353,7 @@ QPushButton {
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
           <item alignment="Qt::AlignTop">
-           <widget class="QListWidget" name="clrErrorslist">
+           <widget class="QListWidget" name="clrUndefSheetslist">
             <property name="maximumSize">
              <size>
               <width>16777215</width>

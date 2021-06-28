@@ -2,7 +2,8 @@ import ntpath
 from os import path
 
 from PySide6 import QtWidgets
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, QRegularExpression
+from PySide6.QtGui import QValidator, QRegularExpressionValidator
 from PySide6.QtWidgets import QMainWindow, QListWidgetItem, QFileDialog, QTableWidgetItem
 
 from models.CLRThreadWorker import CLRThreadWorker
@@ -19,24 +20,27 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-
         # ui initialization:
         self.ui.clrTable.verticalHeader().setVisible(False)
         self.ui.clrTable.setEditTriggers(QtWidgets.QTableWidget.NoEditTriggers)
         self.ui.stackedWidget.setCurrentIndex(0)
-        self.setCLRErrorListVisible(False)
+        self.setUndefinedSheetsListVisible(False)
         self._setAliasesDialog = SetAliasesWindow(self)
         self._sheetErrorsWindow = SheetErrorsWindow()
         self.ui.page3ShowErrorsBtn.setVisible(False)
 
+        #self.ui.clrTable.setStyleSheet("QTableWidget::section{border-width: 1px; border-color: #BABABA; border-style:solid;}")
+        ##self.ui.clrTable.setStyleSheet("table.grid-all>*>tr>.tableblock:last-child,table.grid-cols>*>tr>.tableblock:last-child{border-right-width:1}")
+        # table.grid - all
+        # {
+        #     border - collapse: collapse;
+        # }
+        # https://discuss.asciidoctor.org/Bug-loss-of-borders-in-table-when-span-cells-is-used-td7382.html
+
         # field initialization:
         self._dataRecognitionSystem = DataRecognitionSystem()
+        self._dataRecognitionSystem.loadUserAliasesFromFile(DataRecognitionSystem.USERALIASES_STANDARD_FILE)
         self._clrWorker = CLRThreadWorker(self._dataRecognitionSystem)
-        # self.selectedFiles = [('C:/Users/User/PycharmProjects/RatesComparator/data/7741_Airtime_Tech_RTX_Ratesheet_2020-12-11.xlsx', ''),
-        #                       ('C:/Users/User/PycharmProjects/RatesComparator/data/Korea_Telecom_CLI_28082020.xlsx', ''),
-        #                       ('C:/Users/User/PycharmProjects/RatesComparator/data/RouteTrader_EUR_CLI_04082020.xlsx', ''),
-        #                       ('C:/Users/User/PycharmProjects/RatesComparator/data/Symbio_MVP_International_Standard_Rate_Card_B5F1120(1).xlsx', '')]
-        # self.ui.page2NextBtn.setEnabled(True)
         self._selectedFiles = []
 
         self.linkActions()
@@ -47,19 +51,22 @@ class MainWindow(QMainWindow):
 
     def linkActions(self):
         # Page 1:
-        self.ui.page1NextBtn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
+        self.ui.page1NextBtn.clicked.connect(self._page1NextBtnAction)
+        self.ui.codeEdit.setValidator(QRegularExpressionValidator(QRegularExpression("[0-9]+[!]?")));
+        self.ui.rateEdit.setValidator(QRegularExpressionValidator(QRegularExpression("[0-9]+\\.[0-9]*")));
 
         # Page 2:
         self.ui.btnAddFiles.clicked.connect(self.addFiles)
-        self.ui.filesList.selectionModel().selectionChanged.connect(self.filesListChanged)
+        self.ui.filesList.selectionModel().selectionChanged.connect(self.filesListSelectionChanged)
         self.ui.btnDelFiles.clicked.connect(self.deleteSelectedFile)
+        self.ui.p2DellAllBtn.clicked.connect(self.deleteAllFiles)
         self.ui.page2BackBtn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
         self.ui.page2NextBtn.clicked.connect(self.page2NextBtnClicked)
 
         # Page 3 (CLR):
         self.ui.page3SetAliasesBtn.clicked.connect(self.setAliases)
-        self.ui.clrErrorslist.doubleClicked.connect(self.setAliases)
-        self.ui.page3GoBackBtn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
+        self.ui.clrUndefSheetslist.doubleClicked.connect(self.setAliases)
+        self.ui.page3GoBackBtn.clicked.connect(self.page3BackBtnAction)
         self.ui.page3ShowErrorsBtn.clicked.connect(lambda: self._sheetErrorsWindow.show())
 
         # CLR Worker:
@@ -71,32 +78,51 @@ class MainWindow(QMainWindow):
 
 
     @Slot()
+    def page3BackBtnAction(self):
+        self.ui.stackedWidget.setCurrentIndex(0)
+        self.clearUndefinedSheetList()
+        self.ui.statusbar.clearMessage()
+
+    @Slot()
+    def _page1NextBtnAction(self):
+        if self.ui.radioOpt2.isChecked():
+            dest = self.ui.destEdit.text()
+            code = self.ui.codeEdit.text()
+            rate = self.ui.rateEdit.text()
+            if (not dest or dest.isspace()) and not rate and not code:
+                return
+        self.ui.stackedWidget.setCurrentIndex(1)
+
+    @Slot()
     def clearUndefinedSheetList(self):
-        self.ui.clrErrorslist.clear()
-        self.setCLRErrorListVisible(False)
+        self.ui.clrUndefSheetslist.clear()
+        self.setUndefinedSheetsListVisible(False)
 
     @Slot()
     def setAliases(self):
+        aliases = self._dataRecognitionSystem.getUserAliases()
+        self._setAliasesDialog.setAliases(aliases)
         self._setAliasesDialog.exec_()
         if self._setAliasesDialog.isOk():
             values = self._setAliasesDialog.getValues()
             self._clrWorker.updateDataForUndefinedSheets(values)
 
 
-    def setCLRErrorListVisible(self, visible:bool):
+
+    def setUndefinedSheetsListVisible(self, visible:bool):
         self.ui.clrErrorLabel.setVisible(visible)
-        self.ui.clrErrorslist.setVisible(visible)
+        self.ui.clrUndefSheetslist.setVisible(visible)
         self.ui.page3SetAliasesBtn.setVisible(visible)
 
     @Slot()
     def addUndefinedCLRsheet(self, sheet):
-        self.setCLRErrorListVisible(True)
-        self.ui.clrErrorslist.addItem(QListWidgetItem(str(sheet.filename)))
+        self.setUndefinedSheetsListVisible(True)
+        self.ui.clrUndefSheetslist.addItem(QListWidgetItem(str(sheet.filename)))
 
     @Slot()
     def page2NextBtnClicked(self):
         self.ui.stackedWidget.setCurrentIndex(2)
-        self._clrWorker.setFiles(self._selectedFiles)
+        self._clrWorker.setFiles([f[0] for f in self._selectedFiles])
         if self.ui.radioOpt1.isChecked():
             self._clrWorker.setWorkMode1()
         elif self.ui.radioOpt2.isChecked():
@@ -111,15 +137,22 @@ class MainWindow(QMainWindow):
             for f in self._selectedFiles:
                 if f[1] == i.text():
                     self._selectedFiles.remove(f)
-        # for i in self.selectedFiles:
-        #     print(i)
         for i in self.ui.filesList.selectedItems():
             self.ui.filesList.takeItem(self.ui.filesList.row(i))
         self.ui.page2NextBtn.setEnabled(len(self._selectedFiles) > 0)
 
     @Slot()
-    def filesListChanged(self):
+    def deleteAllFiles(self):
+        self._selectedFiles.clear()
+        self.ui.filesList.clear()
+        self.ui.btnDelFiles.setEnabled(False)
+        self.ui.p2DellAllBtn.setEnabled(False)
+        self.ui.page2NextBtn.setEnabled(False)
+
+    @Slot()
+    def filesListSelectionChanged(self):
         self.ui.btnDelFiles.setEnabled(len(self.ui.filesList.selectedItems()) > 0)
+        self.ui.p2DellAllBtn.setEnabled(self.ui.filesList.count() > 0)
 
     @Slot()
     def addFiles(self):
@@ -133,6 +166,7 @@ class MainWindow(QMainWindow):
                 self.ui.filesList.addItem(caption)
         if len(self._selectedFiles) > 0:
             self.ui.page2NextBtn.setEnabled(True)
+            self.ui.p2DellAllBtn.setEnabled(True)
 
 
 
@@ -165,7 +199,7 @@ class MainWindow(QMainWindow):
             table.setSpan(0, 0, 1, 3)
             return
         maxc = clr.getMaxCountOfSheetsForCode()
-        colNames = ["Destination", "Codes", "Least cost"] + ["Next least cost" for i in range(1*(maxc-1))]
+        colNames = ["Destination", "Codes", "Least cost"] + [self._generateColumnName(i+2) for i in range(maxc-1)]
         table.setColumnCount(2 + maxc)
         table.setHorizontalHeaderLabels(colNames)
         table.setRowCount(len(codes))
@@ -184,7 +218,7 @@ class MainWindow(QMainWindow):
             cc = len(codes[code])
             for j in range(cc):
                 filename = str(codes[code][j][0])
-                price = "{:.2f}".format(codes[code][j][2])
+                price = "{:.5f}".format(codes[code][j][2])
                 table.setItem(i, 2 + j, QTableWidgetItem(f"({price}) {filename}"))
             prevCountryName = countryName
             #if i == 0: break
@@ -194,3 +228,12 @@ class MainWindow(QMainWindow):
     def updateSheetErrorsUI(self, data):
         self.ui.page3ShowErrorsBtn.setVisible(len(data) > 0)
         self._sheetErrorsWindow.setErrors(data)
+
+    def _generateColumnName(self, i):
+        assert i >= 2, "i should be >= 2"
+        if i == 2:
+            return "2nd least cost"
+        elif i == 3:
+            return "3rd least cost"
+        else:
+            return f"{i}th least cost"

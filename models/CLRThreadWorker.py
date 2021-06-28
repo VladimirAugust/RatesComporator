@@ -20,7 +20,7 @@ class CLRThreadWorker(QtCore.QThread):
         self._dataRecognitionSystem = dataRecognitionSystem
         self._selectedFiles = None
         self._undefinedSheets = None
-        self._definedSheets = []
+        self._definedSheets = None
         self._workMode = 1
 
     def setWorkMode1(self):
@@ -32,8 +32,8 @@ class CLRThreadWorker(QtCore.QThread):
         self._workMode = 2
         self._clr.clearCodeFilter()
         self._clr.clearRateFilter()
-        if code != '' and not code.isspace():
-            self._clr.setCodeFilter(code)
+        if (destination != '' and not destination.isspace()) or (code != '' and not code.isspace()):
+            self._clr.setCodeFilter(destination, code)
         if rate != '' and not rate.isspace():
             self._clr.setRateFilter(float(rate))
 
@@ -61,15 +61,19 @@ class CLRThreadWorker(QtCore.QThread):
             self._updateUndefinedSheetListUI()
 
     def run(self):
+        self._definedSheets = []
         self._undefinedSheets = []
-        #self._definedSheets = []
         self.updateCLRTableWidgetSignal.emit(0)
+        self._clr.removeAllSheets()
+        #self._clr.removeAllSheetsExceptFiles(self._selectedFiles)
         for file in self._selectedFiles:
-            if self._clr.sheetFileAlreadyParsed(file[0]):
+            # if self._clr.sheetFileAlreadyParsed(file[0]):
+            #     continue
+            self.updateClrStatusSignal.emit(f"Loading the file {ntpath.basename(file)}...")
+            sheet = Sheet(file)
+            if not sheet.load():
+                self.updateClrStatusSignal.emit(f"An error occurred while opening the file {ntpath.basename(file)}. This file may be corrupted or is not an excel file");
                 continue
-            self.updateClrStatusSignal.emit(f"Loading file {ntpath.basename(file[0])}...")
-            sheet = Sheet(file[0])
-            sheet.load()
             self._dataRecognitionSystem.determineSheetData(sheet)
             sheet.printInfo()
             if not sheet.isDataFormatDefined():
@@ -79,8 +83,17 @@ class CLRThreadWorker(QtCore.QThread):
                 self._definedSheets.append(sheet)
                 self._clr.addSheet(sheet)
 
+        # selFiles = [file[0] for file in self._selectedFiles]
+        # for sheet in self._definedSheets:
+        #     if sheet.fullFilePath in selFiles:
+        #         continue
+        #     self._clr.removeSheet(sheet)
+        #     self._definedSheets.remove(sheet)
+
         self._updateUndefinedSheetListUI()
 
+        if not self._definedSheets and not self._undefinedSheets:
+            return
         if len(self._definedSheets) == 0:
             self.updateClrStatusSignal.emit("Please set manually aliases for unparsed sheets")
             return
