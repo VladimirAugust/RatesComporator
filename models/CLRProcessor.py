@@ -156,7 +156,7 @@ class CLRProcessor:
     def _checkEmptyLines(self, code, rate):
         if code is None and rate is None:
             self._skipLinesCounter += 1
-            if self._skipLinesCounter == 15:
+            if self._skipLinesCounter == 1:
                 return False
         else:
             self._skipLinesCounter = 0
@@ -203,13 +203,7 @@ class CLRProcessor:
     def removeAllSheets(self):
         self._loadedSheets.clear()
 
-    # def removeAllSheetsExceptFiles(self, selectedFiles):
-    #     if not self._loadedSheets:
-    #         return
-    #     oldSheets = self._loadedSheets
-    #     self._loadedSheets = []
-    #     for file in selectedFiles:
-    #
+
     def removeAllSheetsExceptFiles(self, selectedFiles):
         self._loadedSheets = list(filter(lambda sheet: sheet.fullFilePath in selectedFiles, self._loadedSheets))
 

@@ -210,11 +210,11 @@ class Ui_MainWindow(object):
         self.clrErrors = QHBoxLayout()
         self.clrErrors.setObjectName(u"clrErrors")
         self.clrErrors.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.clrUndefSheetslist = QListWidget(self.page_3)
-        self.clrUndefSheetslist.setObjectName(u"clrUndefSheetslist")
-        self.clrUndefSheetslist.setMaximumSize(QSize(16777215, 80))
+        self.clrErrorsSheetList = QListWidget(self.page_3)
+        self.clrErrorsSheetList.setObjectName(u"clrErrorsSheetList")
+        self.clrErrorsSheetList.setMaximumSize(QSize(16777215, 80))
 
-        self.clrErrors.addWidget(self.clrUndefSheetslist, 0, Qt.AlignTop)
+        self.clrErrors.addWidget(self.clrErrorsSheetList, 0, Qt.AlignTop)
 
 
         self.verticalLayout_4.addLayout(self.clrErrors)
@@ -314,7 +314,7 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem1.setText(QCoreApplication.translate("MainWindow", u"Codes", None));
         ___qtablewidgetitem2 = self.clrTable.horizontalHeaderItem(2)
         ___qtablewidgetitem2.setText(QCoreApplication.translate("MainWindow", u"Files...", None));
-        self.clrErrorLabel.setText(QCoreApplication.translate("MainWindow", u"Column definition errors occurred in the following files. Double-click on files to set columns manually:", None))
+        self.clrErrorLabel.setText(QCoreApplication.translate("MainWindow", u"Errors occurred in the following files:", None))
         self.page3GoBackBtn.setText(QCoreApplication.translate("MainWindow", u"< Back to select option", None))
         self.page3ShowErrorsBtn.setText(QCoreApplication.translate("MainWindow", u"Show sheets errors", None))
         self.page3SetAliasesBtn.setText(QCoreApplication.translate("MainWindow", u"Set aliases", None))

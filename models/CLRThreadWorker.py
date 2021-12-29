@@ -5,14 +5,16 @@ from PySide6 import QtCore
 from models.CLRProcessor import CLRProcessor
 from models.DataRecognitionSystem import DataRecognitionSystem
 from models.Sheet import Sheet
+from models.SheetError import SheetError
 
 
 class CLRThreadWorker(QtCore.QThread):
     updateClrStatusSignal = QtCore.Signal(str)
     updateCLRTableWidgetSignal = QtCore.Signal(int)
-    addUndefinedSheetListSignal = QtCore.Signal(Sheet)
+    addUndefinedSheetListSignal = QtCore.Signal(SheetError)
     clearUndefinedSheetListSignal = QtCore.Signal()
     updateSheetErrorsSignal = QtCore.Signal(list)
+    updateErrorsSheetList = QtCore.Signal(list)
 
     def __init__(self, dataRecognitionSystem: DataRecognitionSystem):
         QtCore.QThread.__init__(self)
@@ -65,13 +67,13 @@ class CLRThreadWorker(QtCore.QThread):
         self._undefinedSheets = []
         self.updateCLRTableWidgetSignal.emit(0)
         self._clr.removeAllSheets()
-        #self._clr.removeAllSheetsExceptFiles(self._selectedFiles)
+        self.clearUndefinedSheetListSignal.emit()
+
         for file in self._selectedFiles:
-            # if self._clr.sheetFileAlreadyParsed(file[0]):
-            #     continue
             self.updateClrStatusSignal.emit(f"Loading the file {ntpath.basename(file)}...")
             sheet = Sheet(file)
             if not sheet.load():
+                self.addUndefinedSheetListSignal.emit(SheetError(sheet, SheetError.BAD_FILE_ERROR))
                 self.updateClrStatusSignal.emit(f"An error occurred while opening the file {ntpath.basename(file)}. This file may be corrupted or is not an excel file");
                 continue
             self._dataRecognitionSystem.determineSheetData(sheet)
@@ -83,14 +85,9 @@ class CLRThreadWorker(QtCore.QThread):
                 self._definedSheets.append(sheet)
                 self._clr.addSheet(sheet)
 
-        # selFiles = [file[0] for file in self._selectedFiles]
-        # for sheet in self._definedSheets:
-        #     if sheet.fullFilePath in selFiles:
-        #         continue
-        #     self._clr.removeSheet(sheet)
-        #     self._definedSheets.remove(sheet)
 
-        self._updateUndefinedSheetListUI()
+        for sheet in self._undefinedSheets:
+            self.addUndefinedSheetListSignal.emit(SheetError(sheet, SheetError.COLUMN_DEF_ERROR))
 
         if not self._definedSheets and not self._undefinedSheets:
             return
@@ -104,14 +101,12 @@ class CLRThreadWorker(QtCore.QThread):
         self.updateCLRTableWidgetSignal.emit(1)
         self.updateSheetErrorsSignal.emit(self._clr.getErrors())
         if len(self._undefinedSheets) == 0:
-            self.updateClrStatusSignal.emit("Done. All sheets were parsed successfully")
+            self.updateClrStatusSignal.emit("Done")
         else:
             self.updateClrStatusSignal.emit("Done. Please set manually aliases for unparsed sheets")
 
     def _updateUndefinedSheetListUI(self):
-        self.clearUndefinedSheetListSignal.emit()
-        for sheet in self._undefinedSheets:
-            self.addUndefinedSheetListSignal.emit(sheet)
+        self.updateErrorsSheetList.emit(self._undefinedSheets)
 
     def getCLR(self):
         return self._clr

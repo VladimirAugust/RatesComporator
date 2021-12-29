@@ -343,7 +343,7 @@ QRadioButton#radioButton {
         <item>
          <widget class="QLabel" name="clrErrorLabel">
           <property name="text">
-           <string>Column definition errors occurred in the following files. Double-click on files to set columns manually:</string>
+           <string>Errors occurred in the following files:</string>
           </property>
          </widget>
         </item>

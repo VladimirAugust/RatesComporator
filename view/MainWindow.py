@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QMainWindow, QListWidgetItem, QFileDialog, QTableW
 
 from models.CLRThreadWorker import CLRThreadWorker
 from models.DataRecognitionSystem import DataRecognitionSystem
+from models.SheetError import SheetError
 from view.SetAliasesWindow import SetAliasesWindow
 from view.SheetErrorsWindow import SheetErrorsWindow
 from view.ui_MainWindow import Ui_MainWindow
@@ -65,7 +66,7 @@ class MainWindow(QMainWindow):
 
         # Page 3 (CLR):
         self.ui.page3SetAliasesBtn.clicked.connect(self.setAliases)
-        self.ui.clrUndefSheetslist.doubleClicked.connect(self.setAliases)
+        #self.ui.clrErrorsSheetList.doubleClicked.connect(self.setAliases)
         self.ui.page3GoBackBtn.clicked.connect(self.page3BackBtnAction)
         self.ui.page3ShowErrorsBtn.clicked.connect(lambda: self._sheetErrorsWindow.show())
 
@@ -75,6 +76,7 @@ class MainWindow(QMainWindow):
         self._clrWorker.addUndefinedSheetListSignal.connect(self.addUndefinedCLRsheet)
         self._clrWorker.clearUndefinedSheetListSignal.connect(self.clearUndefinedSheetList)
         self._clrWorker.updateSheetErrorsSignal.connect(self.updateSheetErrorsUI)
+        self._clrWorker.updateErrorsSheetList.connect(self.updateSheetErrorsList)
 
 
     @Slot()
@@ -95,7 +97,7 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def clearUndefinedSheetList(self):
-        self.ui.clrUndefSheetslist.clear()
+        self.ui.clrErrorsSheetList.clear()
         self.setUndefinedSheetsListVisible(False)
 
     @Slot()
@@ -111,13 +113,13 @@ class MainWindow(QMainWindow):
 
     def setUndefinedSheetsListVisible(self, visible:bool):
         self.ui.clrErrorLabel.setVisible(visible)
-        self.ui.clrUndefSheetslist.setVisible(visible)
+        self.ui.clrErrorsSheetList.setVisible(visible)
         self.ui.page3SetAliasesBtn.setVisible(visible)
 
     @Slot()
-    def addUndefinedCLRsheet(self, sheet):
+    def addUndefinedCLRsheet(self, sheet_error):
         self.setUndefinedSheetsListVisible(True)
-        self.ui.clrUndefSheetslist.addItem(QListWidgetItem(str(sheet.filename)))
+        self.ui.clrErrorsSheetList.addItem(QListWidgetItem(str(sheet_error)))
 
     @Slot()
     def page2NextBtnClicked(self):
@@ -127,8 +129,8 @@ class MainWindow(QMainWindow):
             self._clrWorker.setWorkMode1()
         elif self.ui.radioOpt2.isChecked():
             self._clrWorker.setWorkMode2(self.ui.destEdit.text(), self.ui.codeEdit.text(), self.ui.rateEdit.text())
-        self._clrWorker.start()
-        # self._clrWorker.run()
+        #self._clrWorker.start()
+        self._clrWorker.run()
 
 
     @Slot()
@@ -228,6 +230,25 @@ class MainWindow(QMainWindow):
     def updateSheetErrorsUI(self, data):
         self.ui.page3ShowErrorsBtn.setVisible(len(data) > 0)
         self._sheetErrorsWindow.setErrors(data)
+        s = set()
+        s.update([sheet[0].filename for sheet in data])
+        if s:
+            for sheet in s:
+                self.ui.clrErrorsSheetList.addItem(QListWidgetItem(f"{sheet}: {SheetError.CELL_VALUE_ERROR}"))
+            self.setUndefinedSheetsListVisible(True)
+        # for sheet in data:
+        #     sheet[0].filename
+
+
+    def updateSheetErrorsList(self, sheets:list):
+        tmp_list = []
+        for i in range(self.ui.clrErrorsSheetList.count()):
+            txt = self.ui.clrErrorsSheetList.item(i).text()
+            if not txt.endswith(SheetError.COLUMN_DEF_ERROR):
+                tmp_list.append(self.ui.clrErrorsSheetList.item(i).text())
+        self.ui.clrErrorsSheetList.clear()
+        [self.ui.clrErrorsSheetList.addItem(QListWidgetItem(str(i))) for i in tmp_list]
+        [self.ui.clrErrorsSheetList.addItem(QListWidgetItem(f"{i.filename}: {SheetError.COLUMN_DEF_ERROR}")) for i in sheets]
 
     def _generateColumnName(self, i):
         assert i >= 2, "i should be >= 2"
